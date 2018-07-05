@@ -1,3 +1,40 @@
+from schematics.models import Model
+from schematics.types.base import StringType, BooleanType, BaseType, LongType
+from schematics.types.compound import ListType, ModelType, DictType
+from dashbase.request import Request
+
+
+class Payload(Model):
+    fields = DictType(ListType(StringType))
+    stored = StringType()
+    entities = ListType(BaseType)
+
+
+class Hit(Model):
+    timeInSeconds = LongType()
+    globalId = LongType()
+    payload = ModelType(Payload)  # type: Payload
+
+
+class Response(Model):
+    request: Request = ModelType(Request)
+    totalDocs = LongType()
+    numDocs = LongType()
+    numHits = LongType()
+    numDocsProcessed = LongType()
+    numHitsProcessed = LongType()
+    latencyInMillis = LongType()
+    timeProcessedTo = LongType(default=0)
+    isTimedOut = BooleanType(default=False)
+    startId = StringType()
+    endId = StringType()
+    error = StringType()
+    debugMap = DictType(BaseType)
+    hits = ListType(ModelType(Hit))  # type: list[Hit]
+    aggregations = DictType(BaseType)
+    schema = DictType(StringType)
+
+
 class QueryResponse(object):
     def __init__(self, raw):
         self._parsed = False

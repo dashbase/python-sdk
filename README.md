@@ -24,7 +24,7 @@ python3 setup.py sdist bdist_wheel
 ### Upload
 
 ```
-twine upload https://test.pypi.org/legacy/ dist/*
+twine upload  dist/*
 
 # test pypi
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*

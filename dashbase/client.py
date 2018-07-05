@@ -1,6 +1,6 @@
 import requests
 
-from dashbase.response import QueryResponse
+from dashbase.response import Response
 
 
 class LowLevelClient(object):
@@ -9,7 +9,7 @@ class LowLevelClient(object):
         if token:
             self.headers["io.dashbase.auth.token"] = token
         self.host = host
-        self.verify = False
+        self.verify = True
 
     def query(self, req, raw=False):
         path = "/v1/query"
@@ -19,8 +19,7 @@ class LowLevelClient(object):
         res.raise_for_status()
         if raw:
             return res
-        result = QueryResponse(res.json())
-        result.parse()
+        result = Response(res.json())
         return result
 
     def cluster_info(self):
@@ -34,8 +33,7 @@ class LowLevelClient(object):
         res = requests.get("{}{}".format(self.host, path), params={"sql": sql}, headers=self.headers,
                            verify=self.verify)
         res.raise_for_status()
-        result = QueryResponse(res.json())
-        result.parse()
+        result = Response(res.json())
         return result
 
 
