@@ -1,8 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/test_pypi
-
+    working_directory: ~/python-sdk
     docker:
       - image: circleci/python:3.6.1
 
@@ -14,7 +13,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - venv-{{ checksum "Pipfile.lock" }}
+            - venv-{{ checksum "Pipfile" }}
 
       - run:
           name: Set up environment
@@ -32,7 +31,7 @@ jobs:
             sudo mv bin/linux/amd64/github-release /usr/bin/
 
       - save_cache:
-          key: venv-{{ checksum "Pipfile.lock" }}
+          key: venv-{{ checksum "Pipfile" }}
           paths:
             - "venv"
 
