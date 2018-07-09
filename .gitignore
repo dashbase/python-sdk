@@ -3,4 +3,4 @@ dist/
 dashbase_sdk.egg-info/
 Pipfile.lock
 .pytest_cache/
-
+*.pyc

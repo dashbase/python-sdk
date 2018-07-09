@@ -7,7 +7,7 @@ setuptools.setup(
     author="peter wang",
     author_email="peter@dashbase.io",
     description="Dashbase python sdk",
-    packages=find_packages(exclude=['tests.*', 'tests', 'scripts']),
+    packages=find_packages(exclude=['tests.*', 'tests']),
     include_package_data=True,
     install_requires=[
         "requests",
