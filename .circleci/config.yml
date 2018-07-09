@@ -1,0 +1,66 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/test_pypi
+
+    docker:
+      - image: circleci/python:3.6.1
+
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - restore_cache:
+          keys:
+            - venv-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: Set up environment
+          command: |
+            if [ ! -d "venv" ]; then
+              sudo pip install virtualenv
+              virtualenv venv
+            fi
+            . venv/bin/activate
+            pip install pipenv wheel twine
+            pipenv install -e .
+
+            curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
+            tar -jxvf github-release.tar.bz2
+            sudo mv bin/linux/amd64/github-release /usr/bin/
+
+      - save_cache:
+          key: venv-{{ checksum "Pipfile.lock" }}
+          paths:
+            - "venv"
+
+#      - run:
+#          name: Run tests
+#          command: |
+#            . venv/bin/activate
+
+      - deploy:
+          name: "Push Dev image to Docker Hub"
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              . venv/bin/activate
+              ./scripts/setup_pypi.sh
+              ./scripts/upload_to_pypi.sh
+            fi
+      - deploy:
+          name: "Push Latest image to Docker Hub"
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              . venv/bin/activate
+              ./scripts/setup_pypi.sh
+              ./scripts/upload_to_pypi.sh
+              ./scripts/make_github_release.sh
+            fi
+
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build

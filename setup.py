@@ -1,5 +1,5 @@
 import setuptools
-from setuptools import setup, find_packages
+from setuptools import find_packages
 
 setuptools.setup(
     name="dashbase_sdk",
@@ -7,7 +7,7 @@ setuptools.setup(
     author="peter wang",
     author_email="peter@dashbase.io",
     description="Dashbase python sdk",
-    packages=find_packages(exclude=['tests.*', 'tests']),
+    packages=find_packages(exclude=['tests.*', 'tests', 'scripts']),
     include_package_data=True,
     install_requires=[
         "requests",
