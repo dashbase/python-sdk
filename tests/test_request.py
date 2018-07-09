@@ -1,6 +1,6 @@
 import json
 from dashbase.request import Request
-from dashbase.response import  Response
+from dashbase.response import  Response, ClusterOverviewResponse
 
 
 def test_model():
@@ -9,100 +9,84 @@ def test_model():
         "numResults": 1,
         "tableNames": [],
         "excludeTableNames": [],
+        "query": {
+            "queryType": "string",
+            "queryStr": "Linux"
+        },
         "timeRangeFilter": {
-            "startTimeInSec": 1530691746,
-            "endTimeInSec": 1530692646,
+            "startTimeInSec": 1530784313,
+            "endTimeInSec": 2147483647,
             "startGlobalId": 0,
             "endGlobalId": 9223372036854775807
         },
         "fields": [
-            "*"
+            "agnet",
+            "request",
+            "agent",
+            "offset"
         ],
-        "aggregations": {
-            "FILTER.TS.MAX": {
-                "requestType": "numeric",
-                "col": "bytesSent",
-                "type": "count"
-            }
-        },
+        "aggregations": {},
         "useApproximation": false,
-        "ctx": "1bd3563834aa1376",
+        "ctx": "93dfd003-4bf2-4800-a297-79cd16689bea",
         "fetchSchema": false,
         "timeoutMillis": 2147483647,
         "disableHighlight": false,
         "debugMode": 0
     },
-    "totalDocs": 2790111152,
-    "numDocs": 26861394,
-    "numHits": 26861394,
-    "numDocsProcessed": 26861394,
-    "numHitsProcessed": 26861394,
-    "latencyInMillis": 582,
-    "timeProcessedTo": 1530691775,
+    "totalDocs": 2621283522,
+    "numDocs": 19947846,
+    "numHits": 17618659,
+    "numDocsProcessed": 11322,
+    "numHitsProcessed": 10000,
+    "latencyInMillis": 7,
+    "timeProcessedTo": 1530784314,
     "isTimedOut": false,
-    "startId": "nginx_json:0%3A5b3c83d1",
-    "endId": "nginx_json:0%3A5b3c80be",
+    "startId": "nginx_json:0%3A5b3decdc",
+    "endId": "nginx_json:0%3A5b3dea39",
     "debugMap": {},
     "hits": [
         {
-            "timeInSeconds": 1530692561,
-            "globalId": 6574274494020452224,
+            "timeInSeconds": 1530784988,
+            "globalId": 6574671464962719616,
             "payload": {
                 "fields": {
-                    "beat.name": [
-                        "cb7fa5869eaf"
-                    ],
-                    "beat.hostname": [
-                        "cb7fa5869eaf"
-                    ],
                     "request": [
                         "POST mobile.acme.com/mobile/data"
                     ],
                     "agent": [
-                        "Dalvik/1.6.0 (Linux; U; Android 4.2.2; GN9000 Build/JDQ39)"
+                        "Dalvik/1.6.0 (<span class=\\"hl\\">Linux</span>; U; Android 4.4.4; ZTE A880 Build/KTU84P)"
                     ],
                     "offset": [
-                        "1.020038216E9"
-                    ],
-                    "response": [
-                        "200.0"
-                    ],
-                    "host": [
-                        "70.204.104.46"
-                    ],
-                    "source": [
-                        "/data/input/nginx_public.json"
-                    ],
-                    "bytesSent": [
-                        "867.0"
-                    ],
-                    "beat.version": [
-                        "6.1.1"
-                    ],
-                    "_subtable": [
-                        "doc",
-                        "producer3"
+                        "5.201374729E9"
                     ]
                 },
-                "stored": "{\\"@timestamp\\":\\"2018-07-04T08:22:41.416Z\\",\\"host\\":\\"70.204.104.46\\",\\"response\\":200,\\"_subtable\\":\\"producer3\\",\\"beat\\":{\\"name\\":\\"cb7fa5869eaf\\",\\"hostname\\":\\"cb7fa5869eaf\\",\\"version\\":\\"6.1.1\\"},\\"bytesSent\\":867,\\"source\\":\\"/data/input/nginx_public.json\\",\\"offset\\":1020038216,\\"agent\\":\\"Dalvik/1.6.0 (Linux; U; Android 4.2.2; GN9000 Build/JDQ39)\\",\\"request\\":\\"POST mobile.acme.com/mobile/data\\"}",
+                "stored": "{\\"@timestamp\\":\\"2018-07-05T10:03:08.345Z\\",\\"offset\\":5201374729,\\"agent\\":\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; ZTE A880 Build/KTU84P)\\",\\"beat\\":{\\"name\\":\\"5a3dcc47c85b\\",\\"hostname\\":\\"5a3dcc47c85b\\",\\"version\\":\\"6.1.1\\"},\\"_subtable\\":\\"producer2\\",\\"response\\":200,\\"source\\":\\"/data/input/nginx_public.json\\",\\"bytesSent\\":853,\\"request\\":\\"POST mobile.acme.com/mobile/data\\",\\"host\\":\\"78.4.142.245\\"}",
                 "entities": [
                     {
                         "highlight": {
-                            "fields": {},
-                            "stored": []
+                            "fields": {
+                                "agent": [
+                                    [
+                                        {
+                                            "offset": 31,
+                                            "length": 5
+                                        }
+                                    ]
+                                ]
+                            },
+                            "stored": [
+                                {
+                                    "offset": 84,
+                                    "length": 5
+                                }
+                            ]
                         }
                     }
                 ]
             }
         }
     ],
-    "aggregations": {
-        "FILTER.TS.MAX": {
-            "responseType": "numeric",
-            "value": 2.6860884E7,
-            "numDocs": 26860884
-        }
-    },
+    "aggregations": {},
     "schema": {}
 }"""
     data = json.loads(raw)
@@ -110,3 +94,13 @@ def test_model():
     req.validate()
     res = Response(data)
     res.validate()
+
+
+def test_ClusterOverviewResponse():
+    raw = """
+    {"clusterPrefix":"docker","overview":{"nginx_json":{"metrics":{"system":{"cpuLoadFactor":2.2,"cpuUsagePercent":35.04406009335651,"numCores":8,"heapUsage":8511986456,"heapUsagePercent":49.546282133087516,"diskUsage":4370664448,"diskUsagePercent":0.1379402375132169},"indexing":{"numBytesPerSecond":24170504,"numBytesPerDay":2271156278400,"numEventsPerSecond":33865,"numEventsPerDay":3175804800},"query":{"avgLatencyMillis":0,"minLatencyMillis":0,"maxLatencyMillis":174,"p99LatencyMillis":1,"medianLatencyMillis":0,"queriesPerSecond":0},"isError":false},"info":{"0":["10.0.0.248:7888"],"1":["10.0.0.243:7888"]}}}}
+    """
+    data = json.loads(raw)
+    req = ClusterOverviewResponse(data)
+    req.values()
+

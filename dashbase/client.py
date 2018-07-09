@@ -1,6 +1,9 @@
 import requests
 
-from dashbase.response import Response
+from typing import Optional
+
+from dashbase.auth import AuthClient
+from dashbase.response import Response, InfoResponse, ClusterOverviewResponse
 
 
 class LowLevelClient(object):
@@ -20,13 +23,46 @@ class LowLevelClient(object):
         if raw:
             return res
         result = Response(res.json())
+        result.raw_res = res.json()
         return result
 
-    def cluster_info(self):
-        path = "/v1/cluster/tables"
+    def all_cluster_info(self):
+        # type: () -> ClusterOverviewResponse
+        path = "/v1/cluster/all"
         res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
         res.raise_for_status()
-        return res.json()
+        result = ClusterOverviewResponse(res.json())
+        result.raw_res = res.json()
+        return result
+
+    def cluster_info(self, name):
+        # type: (str) -> ClusterOverviewResponse
+        path = "/v1/cluster/{}".format(name)
+        res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
+        res.raise_for_status()
+        result = ClusterOverviewResponse(res.json())
+        result.raw_res = res.json()
+        return result
+
+    def tables(self):
+        path = "/v1/cluster/tables"
+        res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
+        result = ClusterOverviewResponse(res.json())
+        result.raw_res = res.json()
+        return result
+
+    def info(self, names=None):
+        # type: (Optional[list[str]]) -> InfoResponse
+        params = {}
+        if names:
+            params["names"] = names
+
+        path = "/v1/info"
+        res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify, params=params)
+        res.raise_for_status()
+        result = InfoResponse(res.json())
+        result.raw_res = res.json()
+        return result
 
     def sql(self, sql):
         path = "/v1/sql"
@@ -34,11 +70,14 @@ class LowLevelClient(object):
                            verify=self.verify)
         res.raise_for_status()
         result = Response(res.json())
+        result.raw_res = res.json()
         return result
 
 
 class Client(LowLevelClient):
-    def __init__(self, host: str, token: str = None):
+    def __init__(self, host: str, token: str = None, get_local_token: bool = False):
+        if not token and get_local_token:
+            token = AuthClient.get_dashbase_token_in_local(host)
         super().__init__(host, token)
 
     def topn(self, col, numFacets=5, table="*", sql=None):

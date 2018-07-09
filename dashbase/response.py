@@ -1,13 +1,30 @@
 from schematics.models import Model
-from schematics.types.base import StringType, BooleanType, BaseType, LongType
+from schematics.types.base import StringType, BooleanType, BaseType, LongType, FloatType
 from schematics.types.compound import ListType, ModelType, DictType
 from dashbase.request import Request
+
+
+class HighlightIndex(Model):
+    offset = LongType()
+    length = LongType()
+
+
+class HighlightEntity(Model):
+    fields = DictType(ListType(ListType(ModelType(HighlightIndex))))  # type: dict[str, list[HighlightIndex]]
+    stored = ListType(ModelType(HighlightIndex))  # type: list[HighlightIndex]
+
+
+class Entity(Model):
+    highlight = ModelType(HighlightEntity, default=None)  # type: HighlightIndex
+
+    def is_highlight_entity(self):
+        return self.highlight is not None
 
 
 class Payload(Model):
     fields = DictType(ListType(StringType))
     stored = StringType()
-    entities = ListType(BaseType)
+    entities = ListType(ModelType(Entity))  # type: Entity
 
 
 class Hit(Model):
@@ -16,8 +33,12 @@ class Hit(Model):
     payload = ModelType(Payload)  # type: Payload
 
 
-class Response(Model):
-    request: Request = ModelType(Request)
+class DashbaseResponse(Model):
+    raw_res = BaseType()
+
+
+class Response(DashbaseResponse):
+    request = ModelType(Request)  # type: Request
     totalDocs = LongType()
     numDocs = LongType()
     numHits = LongType()
@@ -33,6 +54,59 @@ class Response(Model):
     hits = ListType(ModelType(Hit))  # type: list[Hit]
     aggregations = DictType(BaseType)
     schema = DictType(StringType)
+
+
+class SystemMetric(Model):
+    cpuLoadFactor = FloatType()
+    cpuUsagePercent = FloatType()
+    numCores = LongType()
+    heapUsage = LongType()
+    heapUsagePercent = FloatType()
+    diskUsage = LongType()
+    diskUsagePercent = FloatType()
+
+
+class IndexMetric(Model):
+    numBytesPerSecond = LongType()
+    numBytesPerDay = LongType()
+    numEventsPerSecond = LongType()
+    numEventsPerDay = LongType()
+
+
+class QueryMetric(Model):
+    avgLatencyMillis = LongType()
+    minLatencyMillis = LongType()
+    maxLatencyMillis = LongType()
+    p99LatencyMillis = LongType()
+    medianLatencyMillis = LongType()
+    queriesPerSecond = LongType()
+
+
+class ClusterMetricInfo(Model):
+    system = ModelType(SystemMetric)  # type: SystemMetric
+    indexing = ModelType(IndexMetric)  # type: IndexMetric
+    query = ModelType(QueryMetric)  # type: QueryMetric
+    isError = BooleanType()
+
+
+class ClusterInfo(Model):
+    metrics = ModelType(ClusterMetricInfo)  # type: ClusterMetricInfo
+    info = DictType(ListType(StringType()))
+
+
+class ClusterOverviewResponse(DashbaseResponse):
+    clusterPrefix = StringType()
+    overview = DictType(ModelType(ClusterInfo))  # type: dict[str, ClusterInfo]
+
+
+class InfoResponse(DashbaseResponse):
+    config = BaseType()
+    schema = DictType(StringType)
+    subtableInfo = DictType(LongType)
+    numDocs = LongType()
+    totalRawSize = LongType()
+    totalIndexSize = LongType()
+    totalPayloadSize = LongType()
 
 
 class QueryResponse(object):

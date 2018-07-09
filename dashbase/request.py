@@ -17,7 +17,7 @@ class Request(Model):
     excludeTableNames = ListType(StringType, default=[])
     query = DictType(BaseType)
     aggregations = DictType(BaseType)
-    timeRangeFilter = ModelType(TimeRange)
+    timeRangeFilter = ModelType(TimeRange)  # type: TimeRange
     fields = ListType(StringType, default=[])
     useApproximation = BooleanType(default=False)
     ctx = StringType()
