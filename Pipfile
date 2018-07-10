@@ -10,12 +10,14 @@ name = "pypi"
 twine = "*"
 responses = "*"
 pytest = "*"
+pipenv = "*"
 
 
 [packages]
 
 requests = "*"
 schematics = "*"
+click = "*"
 
 
 [requires]
