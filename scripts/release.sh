@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
-# This script will automatically make a github release after file package generated.
+# This script packages the application and uploads to pypi,
+# and automatically make a github release
+
+python setup.py sdist bdist_wheel
+twine upload --repository-url ${PYPI_HOST} -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
+
 
 github-release release --user $CIRCLE_PROJECT_USERNAME \
     --repo $CIRCLE_PROJECT_REPONAME \

@@ -35,27 +35,18 @@ jobs:
           paths:
             - "venv"
 
-#      - run:
-#          name: Run tests
-#          command: |
-#            . venv/bin/activate
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            python setup.py test
 
       - deploy:
-          name: "Push Dev image to Docker Hub"
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
-              . venv/bin/activate
-              ./scripts/setup_pypi.sh
-              ./scripts/upload_to_pypi.sh
-            fi
-      - deploy:
-          name: "Push Latest image to Docker Hub"
+          name: "Push package to PyPI"
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               . venv/bin/activate
-              ./scripts/setup_pypi.sh
-              ./scripts/upload_to_pypi.sh
-              ./scripts/make_github_release.sh
+              ./scripts/release.sh
             fi
 
 workflows:
