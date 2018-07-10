@@ -23,7 +23,7 @@ jobs:
               virtualenv venv
             fi
             . venv/bin/activate
-            pip install pipenv wheel twine
+            pip install pipenv wheel
             pipenv install -d
 
             curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
