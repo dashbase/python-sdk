@@ -19,5 +19,5 @@ github-release upload --user $CIRCLE_PROJECT_USERNAME \
 github-release upload --user $CIRCLE_PROJECT_USERNAME \
     --repo $CIRCLE_PROJECT_REPONAME \
     --tag "v"`python setup.py --version` \
-    --name `python setup.py --name`"-"`python setup.py --version`"-py3-none-any.wheel" \
-    --file "dist/"`python setup.py --name`"-"`python setup.py --version`"-py3-none-any.wheel"
+    --name `python setup.py --name`"-"`python setup.py --version`"-py3-none-any.whl" \
+    --file "dist/"`python setup.py --name`"-"`python setup.py --version`"-py3-none-any.whl"
