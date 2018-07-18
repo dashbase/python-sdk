@@ -4,20 +4,16 @@ from schematics.types.base import LongType, StringType, BooleanType, BaseType
 from schematics.types.compound import ListType, ModelType, DictType
 
 
-class TimeRange(Model):
-    startTimeInSec = LongType()
-    endTimeInSec = LongType()
+class Request(Model):
+    startTimeInMillis = LongType()
+    endTimeInMillis = LongType()
     endGlobalId = LongType()
     startGlobalId = LongType()
-
-
-class Request(Model):
     numResults = LongType(default=10)
     tableNames = ListType(StringType, default=["*"])
     excludeTableNames = ListType(StringType, default=[])
     query = DictType(BaseType)
     aggregations = DictType(BaseType)
-    timeRangeFilter = ModelType(TimeRange)  # type: TimeRange
     fields = ListType(StringType, default=[])
     useApproximation = BooleanType(default=False)
     ctx = StringType()

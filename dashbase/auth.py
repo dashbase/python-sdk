@@ -28,7 +28,9 @@ class AuthClient(object):
             y = click.confirm("Can't found token in local, do you want input your dashbase account to get token",
                               default=True)
             if not auth_host:
-                _api_host = requests.utils.urlparse(api_host)
+                _api_host = requests.utils.urlparse(api_host, scheme="https")
+                if not _api_host.netloc:
+                    _api_host = requests.utils.urlparse("//" + api_host, scheme="https")
                 default_auth_host = _api_host._replace(netloc="{}:{}".format(_api_host.hostname, "9678")).geturl()
                 auth_host = click.prompt("please input your dashbase auth host", default=default_auth_host)
 

@@ -28,7 +28,7 @@ class Payload(Model):
 
 
 class Hit(Model):
-    timeInSeconds = LongType()
+    timeInMillis = LongType()
     globalId = LongType()
     payload = ModelType(Payload)  # type: Payload
 

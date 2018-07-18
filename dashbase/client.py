@@ -12,7 +12,13 @@ class LowLevelClient(object):
         if token:
             self.headers["io.dashbase.auth.token"] = token
         self.host = host
+        self._host = requests.utils.urlparse(self.host)
+        if not self._host.netloc:
+            self._host = requests.utils.urlparse("//" + host, scheme="https")
+            self.host = self._host.geturl()
+
         self.verify = True
+        self.strict = False
 
     def query(self, req, raw=False):
         path = "/v1/query"
@@ -22,7 +28,7 @@ class LowLevelClient(object):
         res.raise_for_status()
         if raw:
             return res
-        result = Response(res.json())
+        result = Response(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
@@ -31,7 +37,7 @@ class LowLevelClient(object):
         path = "/v1/cluster/all"
         res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
         res.raise_for_status()
-        result = ClusterOverviewResponse(res.json())
+        result = ClusterOverviewResponse(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
@@ -40,14 +46,14 @@ class LowLevelClient(object):
         path = "/v1/cluster/{}".format(name)
         res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
         res.raise_for_status()
-        result = ClusterOverviewResponse(res.json())
+        result = ClusterOverviewResponse(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
     def tables(self):
         path = "/v1/cluster/tables"
         res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify)
-        result = ClusterOverviewResponse(res.json())
+        result = ClusterOverviewResponse(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
@@ -60,7 +66,7 @@ class LowLevelClient(object):
         path = "/v1/info"
         res = requests.get("{}{}".format(self.host, path), headers=self.headers, verify=self.verify, params=params)
         res.raise_for_status()
-        result = InfoResponse(res.json())
+        result = InfoResponse(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
@@ -69,7 +75,7 @@ class LowLevelClient(object):
         res = requests.get("{}{}".format(self.host, path), params={"sql": sql}, headers=self.headers,
                            verify=self.verify)
         res.raise_for_status()
-        result = Response(res.json())
+        result = Response(res.json(), strict=self.strict)
         result.raw_res = res.json()
         return result
 
