@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 
 
 def get_setting_path() -> Path:
@@ -11,3 +12,7 @@ def get_setting_path() -> Path:
         user_path.mkdir(exist_ok=True)
 
     return user_path
+
+
+def convert_millsecond(mills) -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%S.{}%z".format(mills % 1000), time.localtime(mills / 1000))

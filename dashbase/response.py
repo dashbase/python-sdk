@@ -2,6 +2,7 @@ from schematics.models import Model
 from schematics.types.base import StringType, BooleanType, BaseType, LongType, FloatType
 from schematics.types.compound import ListType, ModelType, DictType
 from dashbase.request import Request
+from dashbase.utils import convert_millsecond
 
 
 class HighlightIndex(Model):
@@ -125,7 +126,7 @@ class QueryResponse(object):
         self.total_docs = self.raw['totalDocs']
         for hit in self.raw['hits']:
             obj = {
-                '@timestamp': hit['timeInSeconds']
+                '@timestamp': convert_millsecond(hit['timeInMillis'])
             }
             for key, value in hit["payload"]["fields"].items():
                 obj[key] = value[0]
@@ -138,3 +139,5 @@ class QueryResponse(object):
 
         self.aggregations = self.raw["aggregations"]
         self._parsed = True
+
+        return self
