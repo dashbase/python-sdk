@@ -10,7 +10,7 @@ test_requirements = convert_deps_to_pip(pfile['dev-packages'], r=False)
 
 setuptools.setup(
     name="dashbase_sdk",
-    version="0.0.5",
+    version="0.0.6",
     author="peter wang",
     author_email="peter@dashbase.io",
     description="Dashbase python sdk",
