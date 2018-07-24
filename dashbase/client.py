@@ -2,6 +2,7 @@ import requests
 
 from typing import Optional
 
+from dashbase.request import Request
 from dashbase.auth import AuthClient
 from dashbase.response import Response, InfoResponse, ClusterOverviewResponse
 
@@ -20,10 +21,10 @@ class LowLevelClient(object):
         self.verify = True
         self.strict = False
 
-    def query(self, req, raw=False):
+    def query(self, req: Request, raw=False):
         path = "/v1/query"
 
-        res = requests.post("{}{}".format(self.host, path), json=req.to_dict(), headers=self.headers,
+        res = requests.post("{}{}".format(self.host, path), json=req.to_native(), headers=self.headers,
                             verify=self.verify)
         res.raise_for_status()
         if raw:

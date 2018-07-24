@@ -27,6 +27,8 @@ class AuthClient(object):
         if not path.exists() and not ignore_input:
             y = click.confirm("Can't found token in local, do you want input your dashbase account to get token",
                               default=True)
+            if not y:
+                return ""
             if not auth_host:
                 _api_host = requests.utils.urlparse(api_host, scheme="https")
                 if not _api_host.netloc:
