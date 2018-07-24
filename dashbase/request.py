@@ -5,68 +5,26 @@ from schematics.types.compound import ListType, ModelType, DictType
 
 
 class Request(Model):
-    startTimeInMillis = LongType()
-    endTimeInMillis = LongType()
-    endGlobalId = LongType()
-    startGlobalId = LongType()
+    startTimeInMillis = LongType(serialize_when_none=False)
+    endTimeInMillis = LongType(serialize_when_none=False)
+    endGlobalId = LongType(serialize_when_none=False)
+    startGlobalId = LongType(serialize_when_none=False)
     numResults = LongType(default=10)
     tableNames = ListType(StringType, default=["*"])
     excludeTableNames = ListType(StringType, default=[])
-    query = DictType(BaseType)
-    aggregations = DictType(BaseType)
+    query = DictType(BaseType, serialize_when_none=False)
+    aggregations = DictType(BaseType, serialize_when_none=False)
     fields = ListType(StringType, default=[])
     useApproximation = BooleanType(default=False)
-    ctx = StringType()
+    ctx = StringType(serialize_when_none=False)
     fetchSchema = BooleanType(default=False)
     timeoutMillis = LongType(default=0x7fffffff)
     disableHighlight = BooleanType(default=False)
-    startId = StringType()
-    endId = StringType()
-    debugMode = LongType()
+    startId = StringType(serialize_when_none=False)
+    endId = StringType(serialize_when_none=False)
+    debugMode = LongType(serialize_when_none=False)
 
-
-class QueryRequest(object):
-    def __init__(self,
-                 end_id=None,
-                 start_id=None,
-                 table=None,
-                 query=None,
-                 num=10,
-                 fields=None,
-                 disable_highlight=False,
-                 time_from=None,
-                 time_to=None,
-                 aggs: dict = None
-                 ):
-        self.query = None
-        if query is not None:
-            self.query = {"queryType": "string", "queryStr": query}
-        if aggs is not None:
-            self.aggregations = aggs
-
-        self.disableHighlight = disable_highlight
-        self.endId = end_id
-        self.startId = start_id
-        if table is None:
-            table = "*"
-        self.tableNames = [table]
-        self.numResults = num
-        self.fields = fields
-        if self.fields == "*":
-            self.fields = ["*"]
-
-        self.timeRangeFilter = {
-            "startTimeInSec": time_from,
-            "endTimeInSec": time_to,
-        }
-
-        if not self.timeRangeFilter["startTimeInSec"] and not self.timeRangeFilter["endTimeInSec"]:
-            now = int(time.time())
-            self.timeRangeFilter["startTimeInSec"] = now - 15 * 60
-            self.timeRangeFilter["endTimeInSec"] = now
-
-        if table is None:
-            self.table = []
-
-    def to_dict(self):
-        return dict((k, v) for k, v in self.__dict__.items() if v)
+    def set_query(self, query=None):
+        if not query:
+            query = "*"
+        self.query = {"queryType": "string", "queryStr": query}
