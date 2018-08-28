@@ -9,9 +9,10 @@ from dashbase.response import Response, InfoResponse, ClusterOverviewResponse
 
 class LowLevelClient(object):
     def __init__(self, host: str, token: str = None):
+        self.token = token
         self.headers = {'Accept': 'application/json'}
         if token:
-            self.headers["io.dashbase.auth.token"] = token
+            self.set_token(token)
         self.host = host
         self._host = requests.utils.urlparse(self.host)
         if not self._host.netloc:
@@ -20,6 +21,10 @@ class LowLevelClient(object):
 
         self.verify = True
         self.strict = False
+
+    def set_token(self, token):
+        self.token = token
+        self.headers["io.dashbase.auth.token"] = token
 
     def query(self, req: Request, raw=False):
         path = "/v1/query"
@@ -80,12 +85,34 @@ class LowLevelClient(object):
         result.raw_res = res.json()
         return result
 
+    def config(self):
+        path = "/v1/sql"
+        res = requests.get("{}{}".format(self.host, path), headers=self.headers,
+                           verify=self.verify)
+        res.raise_for_status()
+        return res
+
 
 class Client(LowLevelClient):
     def __init__(self, host: str, token: str = None, get_local_token: bool = False):
-        if not token and get_local_token:
-            token = AuthClient.get_dashbase_token_in_local(host)
         super().__init__(host, token)
+        self.check_auth(get_local_token)
+        # if not token and get_local_token:
+        #     token = AuthClient.get_dashbase_token_in_local(host)
+
+    def check_auth(self, get_local_token):
+        try:
+            self.config()
+        except requests.HTTPError as e:
+            if e.response.status_code == 401:
+                # todo: Remind users that token has expired
+                # if self.token:
+                token = AuthClient.get_dashbase_token_in_local(self.host)
+                if token:
+                    self.set_token(token)
+                return
+            raise e
+
 
     def topn(self, col, numFacets=5, table="*", sql=None):
         if sql is None:
