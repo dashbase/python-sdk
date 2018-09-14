@@ -21,6 +21,21 @@ class LowLevelClient(object):
         self.verify = True
         self.strict = False
 
+    def is_healthy(self):
+        path = "/v1/query"
+
+        req = Request()
+        req.set_query()
+        response = requests.post(
+            "{}{}".format(self.host, path),
+            json=req.to_native(),
+            headers=self.headers,
+            verify=self.verify
+        )
+        response.raise_for_status()
+        result = response.json()
+        return result and result.get('isTimedOut') is False and not result.get('error')
+
     def query(self, req: Request, raw=False):
         path = "/v1/query"
 
