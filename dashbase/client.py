@@ -21,7 +21,7 @@ class LowLevelClient(object):
         self.verify = True
         self.strict = False
 
-    def is_green(self):
+    def is_healthy(self):
         path = "/v1/query"
 
         req = Request()
@@ -32,8 +32,9 @@ class LowLevelClient(object):
             headers=self.headers,
             verify=self.verify
         )
+        response.raise_for_status()
         result = response.json()
-        return result and result.get('isTimedOut') == False and not result.get('error')
+        return result and result.get('isTimedOut') is False and not result.get('error')
 
     def query(self, req: Request, raw=False):
         path = "/v1/query"
@@ -106,9 +107,3 @@ class Client(LowLevelClient):
             sql = 'SELECT TOPN("{col}", {numFacets}) as "values" FROM "{table}" LAST 15 MINUTES LIMIT 100'
         res = self.sql(sql=sql.format(col=col, numFacets=numFacets, table=table))
         return res.aggregations.get("values").get("facets")
-
-
-if __name__ == '__main__':
-    l = LowLevelClient("http://api.staging.k8s.dashbase.io")
-    print(l.is_green())
-    print(1)
