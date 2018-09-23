@@ -1,4 +1,6 @@
 # Dashbase python-sdk
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdashbase%2Fpython-sdk.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdashbase%2Fpython-sdk?ref=badge_shield)
+
 
 
 ## DEV
@@ -30,3 +32,6 @@ twine upload  dist/*
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 ```
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdashbase%2Fpython-sdk.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdashbase%2Fpython-sdk?ref=badge_large)
