@@ -47,7 +47,10 @@ testing: &testing
         until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
           sleep 1;
         done
-
+  - run:
+      name: install dashbase-local
+      command: |
+        helm install dashbase-local --repo https://charts.dashbase.io  --name local
   - run:
       name: Set up environment
       command: |
