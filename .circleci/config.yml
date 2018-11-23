@@ -10,45 +10,77 @@ envs: &envs
   CHANGE_MINIKUBE_NONE_USER: true
 
 testing: &testing
-- checkout
+  - checkout
 
-- restore_cache:
-    keys:
-    - venv-{{ checksum "Pipfile" }}
+  - restore_cache:
+      keys:
+      - venv-{{ checksum "Pipfile" }}
 
-- run:
-    name: Set up environment
-    command: |
-      if [ ! -d "venv" ]; then
-        sudo pip install virtualenv
-        virtualenv venv
-      fi
-      . venv/bin/activate
-      pip install pipenv wheel
-      pipenv install -d
+  - run:
+      name: install helm
+      command: |
+        curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+        helm init --client-only
+        helm plugin install https://github.com/chartmuseum/helm-push
+        helm repo add chartmuseum https://charts.dashbase.io
+  - run:
+      name: install kubectl
+      command: |
+        sudo curl -LO https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl
+        sudo chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
 
-      curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
-      tar -jxvf github-release.tar.bz2
-      sudo mv bin/linux/amd64/github-release /usr/bin/
+  - run:
+      name: setup minikube
+      command: |
+        sudo curl -LO https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.12.0/crictl-v1.12.0-linux-amd64.tar.gz
+        tar -zxvf crictl-v1.12.0-linux-amd64.tar.gz
+        sudo chmod +x ./crictl
+        sudo mv ./crictl /usr/local/bin/crictl
+        crictl --version
+        sudo curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64
+        sudo chmod +x minikube
+        sudo mv minikube /usr/local/bin/
+        sudo -E minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
+        # wait for minikube
+        JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
+        until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
+          sleep 1;
+        done
 
-- save_cache:
-    key: venv-{{ checksum "Pipfile" }}
-    paths:
-    - "venv"
-
-- run:
-    name: Run tests
-    command: |
-      . venv/bin/activate
-#      python setup.py test
-
-- deploy:
-    name: "Push package to PyPI"
-    command: |
-      if [ "${CIRCLE_BRANCH}" == "master" ]; then
+  - run:
+      name: Set up environment
+      command: |
+        if [ ! -d "venv" ]; then
+          sudo pip install virtualenv
+          virtualenv venv
+        fi
         . venv/bin/activate
-        ./scripts/release.sh
-      fi
+        pip install pipenv wheel
+        pipenv install -d
+
+        curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
+        tar -jxvf github-release.tar.bz2
+        sudo mv bin/linux/amd64/github-release /usr/bin/
+
+  - save_cache:
+      key: venv-{{ checksum "Pipfile" }}
+      paths:
+      - "venv"
+
+  - run:
+      name: Run tests
+      command: |
+        . venv/bin/activate
+  #      python setup.py test
+
+  - deploy:
+      name: "Push package to PyPI"
+      command: |
+        if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          . venv/bin/activate
+          ./scripts/release.sh
+        fi
 
 jobs:
   integrate:
