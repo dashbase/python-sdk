@@ -54,7 +54,9 @@ testing: &testing
         kubectl create serviceaccount --namespace kube-system tiller
         kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
         kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
-        sleep 20s
+        until kubectl get pods --field-selector=status.phase!=Running -n kube-system 2>&1 | grep -q "No resources found."; do
+          sleep 2;
+        done
   - run:
       name: install dashbase-local
       command: |
