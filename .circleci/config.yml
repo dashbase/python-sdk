@@ -1,56 +1,66 @@
 version: 2
+prepare: &prepare
+  machine:
+    image: circleci/classic:201808-01
+  working_directory: ~/python-sdk
+envs: &envs
+  KUBECONFIG: /home/circleci/.kube/config
+  MINIKUBE_VERSION: v0.30.0
+  MINIKUBE_HOME: /home/circleci
+  CHANGE_MINIKUBE_NONE_USER: true
+
+testing: &testing
+- checkout
+
+- restore_cache:
+    keys:
+    - venv-{{ checksum "Pipfile" }}
+
+- run:
+    name: Set up environment
+    command: |
+      if [ ! -d "venv" ]; then
+        sudo pip install virtualenv
+        virtualenv venv
+      fi
+      . venv/bin/activate
+      pip install pipenv wheel
+      pipenv install -d
+
+      curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
+      tar -jxvf github-release.tar.bz2
+      sudo mv bin/linux/amd64/github-release /usr/bin/
+
+- save_cache:
+    key: venv-{{ checksum "Pipfile" }}
+    paths:
+    - "venv"
+
+- run:
+    name: Run tests
+    command: |
+      . venv/bin/activate
+#      python setup.py test
+
+- deploy:
+    name: "Push package to PyPI"
+    command: |
+      if [ "${CIRCLE_BRANCH}" == "master" ]; then
+        . venv/bin/activate
+        ./scripts/release.sh
+      fi
+
 jobs:
-  build:
-    working_directory: ~/python-sdk
-    docker:
-      - image: circleci/python:3.6.1
+  integrate:
+    <<: *prepare
+    environment:
+      K8S_VERSION: v1.8.8
+      <<: *envs
+    steps: *testing
 
-    steps:
-      - checkout
-
-      - setup_remote_docker:
-          docker_layer_caching: true
-
-      - restore_cache:
-          keys:
-            - venv-{{ checksum "Pipfile" }}
-
-      - run:
-          name: Set up environment
-          command: |
-            if [ ! -d "venv" ]; then
-              sudo pip install virtualenv
-              virtualenv venv
-            fi
-            . venv/bin/activate
-            pip install pipenv wheel
-            pipenv install -d
-
-            curl -fsSL https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 -o github-release.tar.bz2
-            tar -jxvf github-release.tar.bz2
-            sudo mv bin/linux/amd64/github-release /usr/bin/
-
-      - save_cache:
-          key: venv-{{ checksum "Pipfile" }}
-          paths:
-            - "venv"
-
-      - run:
-          name: Run tests
-          command: |
-            . venv/bin/activate
-            python setup.py test
-
-      - deploy:
-          name: "Push package to PyPI"
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              . venv/bin/activate
-              ./scripts/release.sh
-            fi
 
 workflows:
   version: 2
   build-n-deploy:
     jobs:
-      - build
+    - integrate
