@@ -48,6 +48,14 @@ testing: &testing
           sleep 1;
         done
   - run:
+      name: configure tiller
+      commands: |
+        helm init --upgrade
+        kubectl create serviceaccount --namespace kube-system tiller
+        kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+        kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+        sleep 10s
+  - run:
       name: install dashbase-local
       command: |
         helm install dashbase-local --repo https://charts.dashbase.io  --name local
