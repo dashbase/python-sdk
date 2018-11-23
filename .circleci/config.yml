@@ -54,11 +54,11 @@ testing: &testing
         kubectl create serviceaccount --namespace kube-system tiller
         kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
         kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
-        sleep 10s
+        sleep 20s
   - run:
       name: install dashbase-local
       command: |
-        helm install dashbase-local --repo https://charts.dashbase.io  --name local
+        helm install dashbase-local --repo https://charts.dashbase.io --name local
   - run:
       name: Set up environment
       command: |
@@ -97,7 +97,7 @@ jobs:
   integrate:
     <<: *prepare
     environment:
-      K8S_VERSION: v1.8.8
+      K8S_VERSION: v1.9.10
       <<: *envs
     steps: *testing
 
